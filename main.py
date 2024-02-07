@@ -65,17 +65,17 @@ def play_game(player):
         print(f"\nYour final hand: {player_cards}, final score: {player_score}")
         print(f"Dealer's final hand: {dealer_cards}, final score: {dealer_score}")
 
-        if dealer_score == 0:
-            print("Dealer has Blackjack! You lose.")
-            player.lose(bet)
-        elif dealer_score > 21 or player_score > dealer_score:
-            print("You win!")
-            player.win(bet)
-        elif player_score < dealer_score:
+        if dealer_score == 0 or (dealer_score > player_score and dealer_score <= 21):
             print("Dealer wins!")
             player.lose(bet)
-        else:
+        elif player_score == 0 or (player_score > dealer_score and player_score <= 21) or dealer_score > 21:
+            print("You win!")
+            player.win(bet)
+        elif player_score == dealer_score:
             print("It's a draw!")
+        else:
+            print("Dealer wins!")
+            player.lose(bet)
 
         print(f"{player.name}'s Money: ${player.money}")
 
