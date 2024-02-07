@@ -14,24 +14,30 @@ class Player:
         self.money -= amount
 
 def deal_card():
-    return random.randint(1, 11)
+    return random.randint(1, 10)
 
 def calculate_score(cards):
     score = sum(cards)
     if score == 21 and len(cards) == 2:
-        return 0  # Blackjack
+        return 21  # Blackjack
     if 11 in cards and score > 21:
-        cards.remove(11)
+        cards.remove(10)
         cards.append(1)
     return score
 
 def play_game(player):
     while True:
         print(f"\n{player.name}'s Money: ${player.money}")
-        bet = int(input("How much do you want to bet? "))
-        if bet > player.money:
-            print("You don't have enough money.")
-            continue
+        bet = 0
+        while bet <= 0 or bet > player.money:
+            try:
+                bet = int(input("How much do you want to bet? "))
+                if bet <= 0:
+                    print("Please enter a positive bet amount.")
+                elif bet > player.money:
+                    print("You don't have enough money.")
+            except ValueError:
+                print("Invalid input. Please enter a valid bet amount.")
 
         player_cards = [deal_card(), deal_card()]
         dealer_cards = [deal_card()]
@@ -40,10 +46,10 @@ def play_game(player):
             player_score = calculate_score(player_cards)
             dealer_score = calculate_score(dealer_cards)
 
-            print(f"\nYour cards: {player_cards}, current score: {player_score}")
+            print(f"\nYour cards: {player_cards}, current score: {'Blackjack!' if player_score == 21 else player_score}")
             print(f"Dealer's cards: {dealer_cards[0]}")
 
-            if player_score == 0:
+            if player_score == 21:
                 print("Blackjack! You win!")
                 player.win(bet)
                 break
@@ -58,28 +64,28 @@ def play_game(player):
             elif choice == 's':
                 break
 
-        while dealer_score < 17:
-            dealer_cards.append(deal_card())
-            dealer_score = calculate_score(dealer_cards)
+        if player_score <= 21:  # Only if player hasn't busted
+            while dealer_score < 17:
+                dealer_cards.append(deal_card())
+                dealer_score = calculate_score(dealer_cards)
 
         print(f"\nYour final hand: {player_cards}, final score: {player_score}")
         print(f"Dealer's final hand: {dealer_cards}, final score: {dealer_score}")
 
-        if dealer_score == 0 or (dealer_score > player_score and dealer_score <= 21):
+        if player_score > 21:
             print("Dealer wins!")
-            player.lose(bet)
-        elif player_score == 0 or (player_score > dealer_score and player_score <= 21) or dealer_score > 21:
+        elif dealer_score > 21 or player_score > dealer_score:
             print("You win!")
             player.win(bet)
-        elif player_score == dealer_score:
-            print("It's a draw!")
-        else:
+        elif player_score < dealer_score:
             print("Dealer wins!")
             player.lose(bet)
+        else:
+            print("It's a draw!")
 
         print(f"{player.name}'s Money: ${player.money}")
 
-        if player.money == 0:
+        if player.money <= 0:
             print("You're out of money. Game over.")
             break
 
